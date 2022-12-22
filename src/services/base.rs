@@ -41,15 +41,15 @@ pub trait WithOptions {
 }
 
 macro_rules! request {
-    ($name:ident ($service:expr) -> $response:ty { $($fi:ident : $ft:ty),* }) => {
-        #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, derive_builder::Builder)]
+    ($name:ident ($service:expr) -> $response:ty { $( $(#[$att:meta])* $fi:ident : $ft:ty),* }) => {
+        #[derive(Debug, Clone, derive_builder::Builder)]
         pub struct $name {
             // -------------------------------------------------------
             // ---  STUFFS THAT ARE COMMON TO ALL REQUESTS -----------
             // -------------------------------------------------------
             /// Mode of transportation
-            #[builder(default="crate::Profile::Car")]
-            profile: crate::Profile,
+            #[builder(default="crate::TransportationMode::Car")]
+            profile: crate::TransportationMode,
             /// Coordinates the request bears on
             coordinates: crate::Coordinates,
             // -------------------------------------------------------
@@ -83,7 +83,7 @@ macro_rules! request {
             // -------------------------------------------------------
             // ---  SERVICE SPECIFIC OPTIONS -------------------------
             // -------------------------------------------------------
-            $($fi : $ft),*
+            $( $(#[$att])* $fi : $ft),*
         }
 
         impl crate::Request for $name {}
@@ -101,6 +101,19 @@ macro_rules! request {
                     .await?
                     .into()
             }
+            pub async fn debug(&self, client: &crate::Client) -> Result<String, crate::Error> {
+                let mut options = self.options();
+                self.add_general_options(&mut options);
+
+                let rsp = client.reqwest.get(self.url(client))
+                    .query(&options)
+                    .send()
+                    .await?
+                    .text()
+                    .await?;
+                    
+                Ok(rsp)
+            }
 
             fn url(&self, client: &crate::Client) -> String {
                 let base    = &client.base_url;
@@ -113,32 +126,40 @@ macro_rules! request {
             }
 
             fn add_general_options(&self, options: &mut Vec<(&'static str, String)>) {
-                if let Some(bearings) = self.bearings.as_ref() {
-                    options.push(("bearings", crate::multi(bearings)));
-                }
-                if let Some(radiuses) = self.radiuses.as_ref() {
-                    options.push(("radiuses", crate::multi(radiuses)));
-                }
-                
-                options.push(("generate_hints", format!("{}", self.generate_hints)));
-                if let Some(hints) = self.hints.as_ref() {
-                    options.push(("hints", crate::multi(hints)));
-                }
-                if let Some(approaches) = self.approaches.as_ref() {
-                    options.push(("approaches", crate::multi(approaches)));
-                }
-                if let Some(exclude) = self.exclude.as_ref() {
-                    options.push(("exclude", crate::multi(exclude)));
-                }
-                if let Some(snapping) = self.snapping.as_ref() {
-                    options.push(("snapping", format!("{snapping}")));
-                }
-                options.push(("skip_waypoints", format!("{}", self.skip_waypoints)));
+                crate::add_option!(opt multi options, bearings,       self.bearings);
+                crate::add_option!(opt multi options, radiuses,       self.radiuses);
+                crate::add_option!(          options, generate_hints, self.generate_hints);
+                crate::add_option!(opt multi options, hints,          self.hints);
+                crate::add_option!(opt multi options, approaches,     self.approaches);
+                crate::add_option!(opt multi options, exclude,        self.exclude);
+                crate::add_option!(opt       options, snapping,       self.snapping);
+                crate::add_option!(          options, skip_waypoints, self.skip_waypoints);
             }
         }
     };
 }
+
+macro_rules! add_option {
+    (multi $options:expr, $name:ident, $field:expr) => {
+        $options.push((stringify!($name), format!("{}", crate::multi($field))));
+    };
+    ($options:expr, $name:ident, $field:expr) => {
+        $options.push((stringify!($name), format!("{}", $field)));
+    };
+    (opt $options:expr, $name:ident, $field:expr) => {
+        if let Some(option) = $field {
+            $options.push((stringify!($name), format!("{option}")));
+        }
+    };
+    (opt multi $options:expr, $name:ident, $field:expr) => {
+        if let Some(option) = $field.as_ref() {
+            $options.push((stringify!($name), crate::multi(option)));
+        }
+    };
+}
+
 pub(crate) use request;
+pub(crate) use add_option;
 
 #[derive(Debug, Deserialize)]
 pub struct Response<T> {

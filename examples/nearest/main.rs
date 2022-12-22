@@ -1,14 +1,13 @@
-use osrm_client::{NearestBuilder, Location, Coordinates, Profile, Client};
+use osrm_client::{NearestRequestBuilder, Location, Coordinates, TransportationMode, Client};
 
 
 #[tokio::main]
 async fn main() -> Result<(), osrm_client::Error>{
     let client = Client::default();
     
-    let req = NearestBuilder::default()
-        .profile(Profile::Car)
-        .coordinates(Coordinates::Single(Location::new(4.35, 50.8333)))
-        .number(None)
+    let req = NearestRequestBuilder::default()
+        .profile(TransportationMode::Foot)
+        .coordinates(Coordinates::Single(Location::new(2.290253, 48.8583701)))
         .build()
         .unwrap();
     
