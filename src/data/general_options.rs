@@ -54,7 +54,7 @@ impl Default for Radius {
 /// Keep waypoints on curb side
 #[derive(Debug, Display, Clone, Copy, Serialize, Deserialize)]
 pub enum Approach {
-    #[display(""unrestricted)]
+    #[display("unrestricted")]
     Unrestricted, 
     #[display("curb")]
     Curb, 
