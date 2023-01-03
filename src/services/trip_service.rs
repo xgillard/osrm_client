@@ -17,16 +17,16 @@
 //! 
 //! Currently, not all combinations of roundtrip, source and destination are supported. 
 //! Right now, the following combinations are possible:
-//! roundtrip | source 	| destination | supported
+//! roundtrip | source  | destination | supported
 //! ----------+---------+-------------+-----------
-//! true 	  | first 	| last 	      |    yes
-//! true 	  | first 	| any 	      |    yes
-//! true 	  | any 	| last 	      |    yes
-//! true 	  | any 	| any 	      |    yes
-//! false     |	first 	| last 	      |    yes
-//! false     |	first 	| any 	      |    no
-//! false     |	any 	| last 	      |    no
-//! false     |	any 	| any 	      |    no
+//! true      | first   | last        |    yes
+//! true      | first   | any         |    yes
+//! true      | any     | last        |    yes
+//! true      | any     | any         |    yes
+//! false     | first   | last        |    yes
+//! false     | first   | any         |    no
+//! false     | any     | last        |    no
+//! false     | any     | any         |    no
 
 use displaythis::Display;
 use serde::{Serialize, Deserialize};
