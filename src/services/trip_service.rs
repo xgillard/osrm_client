@@ -71,9 +71,9 @@ impl WithOptions for TripRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TripResponse {
     /// Array of Waypoint objects representing all waypoints in input order.
-    waypoints: Vec<TripWaypoint>,
+    pub waypoints: Vec<TripWaypoint>,
     /// An array of Route objects that assemble the trace
-    trips: Vec<Route>,
+    pub trips: Vec<Route>,
 }
 
 /// Returned route starts at any or first coordinate (by default, any)
