@@ -1,6 +1,6 @@
 [package]
 name             = "osrm_client"
-version          = "0.1.1"
+version          = "0.1.2"
 authors          = ["Xavier Gillard <xavier.gillard@uclouvain.be>"]
 edition          = "2021"
 description      = "A lightweight client for the HTTP services provided by OSRM."
