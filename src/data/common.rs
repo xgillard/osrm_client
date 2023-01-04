@@ -336,7 +336,7 @@ pub struct RouteStep {
     /// The estimated travel time, in seconds
     pub duration: f32,
     /// The unsimplified geometry of the route segment, depending on the geometries parameter.
-    pub geometry: String,
+    pub geometry: Geometry,
     /// The calculated weight of the step.
     pub weight: f32,
     /// The name of the way along which travel proceeds.
@@ -442,11 +442,87 @@ pub struct Route {
     pub duration: f32,
     /// The whole geometry of the route value depending on overview parameter, format depending on 
     /// the geometries parameter. See RouteStep's geometry property for a parameter documentation.
-    pub geometry: String,
+    pub geometry: Geometry,
     /// The calculated weight of the route.
     pub weight: f32,
     /// The name of the weight profile used during extraction phas
     pub weight_name: String,
     /// The legs between the given waypoints, an array of RouteLeg objects.
     pub legs: Vec<RouteLeg>,
+}
+
+/// Represents a geometry which can either be encoded with polyline of polyline6
+/// or explicit in the form of a geojson
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Geometry {
+    /// When the geometry is encoded with polyline or polyline6
+    Encoded(String),
+    /// When the geometry is explicitly detailed
+    Explicit(GeoJsonGeometry)
+}
+
+/// GeoJSON[1] is an open standard format designed for representing simple geographical features, 
+/// along with their non-spatial attributes. It is based on the JSON format.
+/// 
+/// The features include points (therefore addresses and locations), line strings (therefore streets, 
+/// highways and boundaries), polygons (countries, provinces, tracts of land), and multi-part 
+/// collections of these types. GeoJSON features need not represent entities of the physical 
+/// world only; mobile routing and navigation apps, for example, might describe their service 
+/// coverage using GeoJSON.[2]
+///
+/// The GeoJSON format differs from other GIS standards in that it was written and is maintained 
+/// not by a formal standards organization, but by an Internet working group of developers.[3] 
+/// 
+/// ## Geometries
+/// Points are [x, y] or [x, y, z]. They may be [longitude, latitude] or [eastings, northings]. 
+/// Elevation is an optional third number. They are decimal numbers. [6]
+/// For example, London (51.5074° North, 0.1278° West) is [-0.1278, 51.5074] 
+/// 
+/// (Ref: https://en.wikipedia.org/wiki/GeoJSON#Geometries)
+/// 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag="type")]
+pub enum GeoJsonGeometry {
+    Point { coordinates: GeoJsonPoint },
+    LineString { coordinates: Vec<GeoJsonPoint> },
+    Polygon { coordinates: Vec<Vec<GeoJsonPoint>> },
+    MultiPoint { coordinates: Vec<GeoJsonPoint> },
+    MultiLineString { coordinates: Vec<Vec<GeoJsonPoint>> },
+    MultiPolygon { coordinates: Vec<Vec<Vec<GeoJsonPoint>>> },
+}
+
+/// Points are [x, y] or [x, y, z]. They may be [longitude, latitude] or [eastings, northings]. 
+/// Elevation is an optional third number. They are decimal numbers. [6]
+/// For example, London (51.5074° North, 0.1278° West) is [-0.1278, 51.5074] 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GeoJsonPoint {
+    Regular([f32; 2]),
+    Elevated([f32; 3]),
+}
+impl GeoJsonPoint {
+    pub fn location(self) -> Location {
+        match self {
+            GeoJsonPoint::Regular(x)  => Location { longitude: x[0], latitude: x[1] },
+            GeoJsonPoint::Elevated(x) => Location { longitude: x[0], latitude: x[1] },
+        }
+    }
+    pub fn elevation(self) -> Option<f32> {
+        match self {
+            GeoJsonPoint::Regular(_)  => None,
+            GeoJsonPoint::Elevated(x) => Some(x[2]),
+        }
+    }
+    pub fn coordinates(&self) -> &[f32] {
+        match self {
+            GeoJsonPoint::Regular(x)  => x,
+            GeoJsonPoint::Elevated(x) => x,
+        }
+    }
+}
+impl From<Location> for GeoJsonPoint {
+    fn from(Location { longitude, latitude }: Location) -> Self {
+        Self::Regular([longitude, latitude])
+    }
 }
