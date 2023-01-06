@@ -587,7 +587,7 @@ dependencies = [
 
 [[package]]
 name = "osrm_client"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "anyhow",
  "bytes",
