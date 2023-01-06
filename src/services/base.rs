@@ -34,7 +34,18 @@ impl Default for Client {
         }
     }
 }
-
+impl Client {
+    /// Sets the base url of the client
+    pub fn base_url(mut self, url: String) -> Self {
+        self.base_url = url;
+        self
+    }
+    /// Sets the protocol version (currently useless since v1 is the only supported version)
+    pub fn version(mut self, version: String) -> Self {
+        self.version = version;
+        self
+    }
+}
 pub trait Request : WithOptions {}
 pub trait WithOptions {
     fn options(&self) -> Vec<(&'static str, String)>;
