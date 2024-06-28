@@ -83,7 +83,7 @@ impl Default for RouteAnnotationRequest {
 pub enum OverviewRequest {
     #[display("false")]
     NoOverview,
-    #[display("siplified")]
+    #[display("simplified")]
     Simplified,
     #[display("full")]
     Full,

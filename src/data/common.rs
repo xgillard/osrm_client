@@ -10,7 +10,7 @@ use serde::{Serialize, Deserialize};
 pub enum TransportationMode {
     /// Travelling by car
     #[display("car")]
-    #[serde(rename="car")]
+    #[serde(rename="driving")]
     Car, 
     /// Travelling by bike
     #[display("bike")]
@@ -131,16 +131,18 @@ pub struct Intersection {
     /// before the maneuver/passing the intersection. Bearings are given relative to the 
     /// intersection. To get the bearing in the direction of driving, the bearing has to be 
     /// rotated by a value of 180. The value is not supplied for depart maneuvers.
-    pub in_index: usize,
+    #[serde(rename="in")]
+    pub in_index: usize,  // TODO: Option<> ?
     /// index into the bearings/entry array. Used to extract the bearing just after the turn. 
     /// Namely, The clockwise angle from true north to the direction of travel immediately 
     /// after the maneuver/passing the intersection. The value is not supplied for arrive 
     /// maneuvers.
-    pub out_index: usize,
+    #[serde(rename="out")]
+    pub out_index: usize,  // TODO: Option<> ?
     /// Array of Lane objects that denote the available turn lanes at the intersection. 
     /// If no lane information is available for an intersection, the lanes property will not 
     /// be present.
-    pub lanes: Vec<Lane>
+    pub lanes: Vec<Lane>  // TODO: Option<> ?
 }
 
 /// A Lane represents a turn lane at the corresponding turn location.
@@ -303,7 +305,7 @@ pub struct StepManeuver {
     pub bearing_before: u16,
     /// The clockwise angle from true north to the direction of travel immediately 
     /// after the maneuver. Range 0-359.
-    pub bearing_aftter: u16,
+    pub bearing_after: u16,
     /// A string indicating the type of maneuver. 
     /// **new identifiers might be introduced without API change** 
     /// Types unknown to the client should be handled like the turn type, the existence 
@@ -385,23 +387,23 @@ pub enum DrivingSide {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Annotation {
     /// The distance, in metres, between each pair of coordinates
-    pub distance: f32,
+    pub distance: Vec<f32>, // TODO: Option<> ?
     /// The duration between each pair of coordinates, in seconds. Does not include the 
     /// duration of any turns
-    pub duration: f32,
+    pub duration: Vec<f32>, // TODO: Option<> ?
     /// The index of the datasource for the speed between each pair of coordinates. 0 is the default 
     /// profile, other values are supplied via --segment-speed-file to osrm-contract or osrm-customize. 
     /// String-like names are in the metadata.datasource_names array.
-    pub datasources: Vec<usize>,
+    pub datasources: Vec<usize>, // TODO: Option<> ?
     /// The OSM node ID for each coordinate along the route, excluding the first/last user-supplied
     /// coordinates
     pub nodes: Option<Vec<usize>>,
     /// The weights between each pair of coordinates. Does not include any turn costs
-    pub weight: Vec<f32>,
+    pub weight: Vec<f32>, // TODO: Option<> ?
     /// Convenience field, calculation of distance / duration rounded to one decimal place
-    pub speed: f32,
+    pub speed: Vec<f32>, // TODO: Option<> ?
     /// Metadata related to other annotations
-    pub metadata: AnnotationMetaData,
+    pub metadata: AnnotationMetaData, // TODO: Option<> ?
 }
 /// Some meta-data attached to route annotations
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -442,7 +444,7 @@ pub struct Route {
     pub duration: f32,
     /// The whole geometry of the route value depending on overview parameter, format depending on 
     /// the geometries parameter. See RouteStep's geometry property for a parameter documentation.
-    pub geometry: Geometry,
+    pub geometry: Geometry, // TODO: Option<> ?
     /// The calculated weight of the route.
     pub weight: f32,
     /// The name of the weight profile used during extraction phas
