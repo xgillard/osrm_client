@@ -444,7 +444,7 @@ pub struct Route {
     pub duration: f32,
     /// The whole geometry of the route value depending on overview parameter, format depending on 
     /// the geometries parameter. See RouteStep's geometry property for a parameter documentation.
-    pub geometry: Option<Geometry>, // TODO: Option<> ?
+    pub geometry: Geometry, // TODO: Option<> ?
     /// The calculated weight of the route.
     pub weight: f32,
     /// The name of the weight profile used during extraction phas
